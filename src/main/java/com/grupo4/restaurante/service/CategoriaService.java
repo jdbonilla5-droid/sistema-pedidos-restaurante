@@ -4,8 +4,10 @@ import com.grupo4.restaurante.dto.CategoriaRequest;
 import com.grupo4.restaurante.dto.CategoriaResponse;
 import com.grupo4.restaurante.entity.Categoria;
 import com.grupo4.restaurante.exception.RecursoDuplicadoException;
+import com.grupo4.restaurante.exception.RecursoEnUsoException;
 import com.grupo4.restaurante.exception.RecursoNoEncontradoException;
 import com.grupo4.restaurante.repository.CategoriaRepository;
+import com.grupo4.restaurante.repository.PlatoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +17,14 @@ import java.util.List;
 public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
+    private final PlatoRepository platoRepository;
 
-    public CategoriaService(CategoriaRepository categoriaRepository) {
+    public CategoriaService(
+            CategoriaRepository categoriaRepository,
+            PlatoRepository platoRepository) {
+
         this.categoriaRepository = categoriaRepository;
+        this.platoRepository = platoRepository;
     }
 
     @Transactional
@@ -36,22 +43,14 @@ public class CategoriaService {
 
         Categoria guardada = categoriaRepository.save(categoria);
 
-        return new CategoriaResponse(
-                guardada.getId(),
-                guardada.getNombre(),
-                guardada.getDescripcion()
-        );
+        return convertirAResponse(guardada);
     }
 
     @Transactional(readOnly = true)
     public List<CategoriaResponse> listar() {
         return categoriaRepository.findAll()
                 .stream()
-                .map(categoria -> new CategoriaResponse(
-                        categoria.getId(),
-                        categoria.getNombre(),
-                        categoria.getDescripcion()
-                ))
+                .map(this::convertirAResponse)
                 .toList();
     }
 
@@ -62,12 +61,9 @@ public class CategoriaService {
                         "No existe una categoría con el ID " + id
                 ));
 
-        return new CategoriaResponse(
-                categoria.getId(),
-                categoria.getNombre(),
-                categoria.getDescripcion()
-        );
+        return convertirAResponse(categoria);
     }
+
     @Transactional
     public CategoriaResponse actualizar(Long id, CategoriaRequest request) {
         Categoria categoria = categoriaRepository.findById(id)
@@ -88,11 +84,7 @@ public class CategoriaService {
 
         Categoria guardada = categoriaRepository.save(categoria);
 
-        return new CategoriaResponse(
-                guardada.getId(),
-                guardada.getNombre(),
-                guardada.getDescripcion()
-        );
+        return convertirAResponse(guardada);
     }
 
     @Transactional
@@ -102,6 +94,20 @@ public class CategoriaService {
                         "No existe una categoría con el ID " + id
                 ));
 
+        if (platoRepository.existsByCategoria_Id(id)) {
+            throw new RecursoEnUsoException(
+                    "No se puede eliminar la categoría porque tiene platos asociados"
+            );
+        }
+
         categoriaRepository.delete(categoria);
+    }
+
+    private CategoriaResponse convertirAResponse(Categoria categoria) {
+        return new CategoriaResponse(
+                categoria.getId(),
+                categoria.getNombre(),
+                categoria.getDescripcion()
+        );
     }
 }
