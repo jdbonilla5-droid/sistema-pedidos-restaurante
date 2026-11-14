@@ -46,4 +46,11 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(respuesta);
     }
+    @ExceptionHandler(RecursoEnUsoException.class)
+    public ResponseEntity<Map<String, String>> manejarRecursoEnUso(
+            RecursoEnUsoException exception) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("mensaje", exception.getMessage()));
+    }
 }
