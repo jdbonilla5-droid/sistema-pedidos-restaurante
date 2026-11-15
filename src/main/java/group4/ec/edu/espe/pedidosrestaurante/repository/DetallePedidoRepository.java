@@ -17,7 +17,6 @@ public interface DetallePedidoRepository extends JpaRepository<DetallePedido, Lo
 
     long countByPedidoId(Long pedidoId);
 
-    /** Suma de cantidad x precio unitario de todos los detalles. Devuelve null si el pedido no tiene detalles. */
     @Query("SELECT SUM(d.cantidad * d.precioUnitario) FROM DetallePedido d WHERE d.pedido.id = :pedidoId")
     BigDecimal calcularTotalPorPedido(@Param("pedidoId") Long pedidoId);
 }

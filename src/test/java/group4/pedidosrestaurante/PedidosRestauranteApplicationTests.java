@@ -1,4 +1,4 @@
-package group4.ec.edu.espe.pedidosrestaurante;
+package group4.pedidosrestaurante;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
