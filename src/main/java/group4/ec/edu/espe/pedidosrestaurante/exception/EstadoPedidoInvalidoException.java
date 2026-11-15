@@ -1,0 +1,5 @@
+package group4.ec.edu.espe.pedidosrestaurante.exception;
+
+public class EstadoPedidoInvalidoException extends RuntimeException {
+    public EstadoPedidoInvalidoException(String mensaje) { super(mensaje); }
+}
